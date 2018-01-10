@@ -1,0 +1,89 @@
+/* BOILERPLATE & RESETS */
+
+@-o-viewport {
+    width: device-width;
+}
+
+@-ms-viewport {
+    width: device-width;
+}
+
+@viewport {
+    width: device-width;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    -webkit-text-size-adjust: 100%;
+}
+
+*,
+*:before,
+*:after {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    position: relative;
+    background: #fff;
+    color: #000;
+    font-family: 'Playfair Display', "Times New Roman", serif;
+}
+
+.cf:before,
+.cf:after,
+.container:before,
+.container:after {
+    content: "";
+    display: table;
+}
+
+.cf:after,
+.container:after {
+    clear: both;
+}
+
+.cf,
+.container {
+    zoom: 1;
+}
+
+.container {
+    width: 1120px;
+    margin: 0 auto;
+}
+
+
+/* COMMON STYLES */
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+section {
+    padding: 45px 0;
+}
+
+.content {
+    line-height: 1.5;
+}
+
+
+/* GRID */
+
+.fourth {
+    width: 25%;
+    float: left;
+}

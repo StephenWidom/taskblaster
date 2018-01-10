@@ -1,12 +1,126 @@
 @import '~pretty-checkbox/src/pretty-checkbox.scss';
+@import './base/base';
 
-.good {
+body {
+    max-width: 480px;
+    margin: 0 auto;
+    border-left: 1px dotted #000;
+    border-right: 1px dotted #000;
+}
+
+.container {
+    max-width: 85%;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+
+.view-buttons button {
+    display: block;
+    float: left;
+    width: 45%;
+    border: 1px solid #555;
+    text-align: center;
+    padding: 5px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.view-buttons button:not(:last-child) {
+    border-right: none;
+}
+
+#show-help {
+    width: 10%;
+}
+
+button:active {
+    background: red;
+}
+
+.goals .entry,
+.legend {
+    width: 100%;
+    margin: 0;
+    border-bottom: 1px dotted #ccc;
+}
+
+.legend {
+    border-bottom: 1px dotted #000;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    font-size: 10pt;
+}
+
+.entry:not(.legend):nth-child(even) {
+    background: #dedede;
+}
+
+.entry span,
+.entry .button,
+.legend span {
+    width: 15%;
+    float: left;
+    display: block;
+}
+
+.entry .button,
+.legend .empty {
+    width: 10%;
+}
+
+.entry .name,
+.legend .name {
+    width: 50%;
+    text-align: left;
+}
+
+#rewards .name {
+    width: 80%;
+}
+
+#rewards .points {
+    width: 10%;
+    text-align: right;
+}
+
+#rewards .remove {
+    width: 10%;
+}
+
+.met {
     color: green;
 }
 
-.swipe div {
+.swipe>div {
     width: 100%;
     text-align: center;
     float: left;
     position: relative;
 }
+
+.reorder {
+    position: relative;
+}
+
+.reorder,
+.reorder div {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.reorder div {
+    cursor: pointer;
+}
+
+.reorder div.dragged {
+    color: green;
+    z-index: 9999;
+}
+
+.reorder div.placeholder {
+    background: red !important;
+}
+

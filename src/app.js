@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactSwipe from 'react-swipe';
-import Reorder from 'react-reorder';
+import Reorder, { reorder } from 'react-reorder';
 import './styles/styles.scss';
 
 class App extends React.Component {
@@ -27,14 +27,14 @@ class App extends React.Component {
         this.clearEverything = this.clearEverything.bind(this);
         this.prev = this.prev.bind(this);
         this.next = this.next.bind(this);
+        this.help = this.help.bind(this);
+        this.onReorder = this.onReorder.bind(this);
     }
 
     render() {
         return (
-            <div>
+            <div className="container">
                 <h1>Points: {this.state.points}</h1>
-                <button onClick={this.prev}>Goals</button>
-                <button onClick={this.next}>Rewards</button>
                 <form onSubmit={this.addGoalOrReward}>
                     <input name="name" />
                     <input name="points" />
@@ -48,24 +48,71 @@ class App extends React.Component {
                     </div>
                     <input type="submit" />
                 </form>
+                <div className="cf view-buttons">
+                    <button id="show-goals" onClick={this.prev}>Goals</button>
+                    <button id="show-rewards" onClick={this.next}>Rewards</button>
+                    <button id="show-help" onClick={this.help}>?</button>
+                </div>
                 <ReactSwipe key={2} className="swipe" ref={reactSwipe => this.reactSwipe = reactSwipe} swipeOptions={{continuous: false}}>
                     <div id="goals">
                         <h2>Goals</h2>
+                        <div className="entry cf legend">
+                            <span className="empty">&nbsp;</span>
+                            <span className="name">Goal</span>
+                            <span className="points">Points</span>
+                            <span className="count">Count</span>
+                            <span className="empty">&nbsp;</span>
+                        </div>
                         {this.state.goals.length > 0 ? 
+                        <Reorder
+                            reorderId="goals-reorder"
+                            className="reorder goals"
+                            onReorder={this.onReorder}
+                            mouseHoldTime={500}
+                            lock="horizontal"
+                        >
+                        {
                             this.state.goals.map((goal) => (
-                                <p key={goal.name}>{goal.name}: {goal.points} <button onClick={() => { this.addCount(goal.name) }}>Done'd</button> ({goal.count})<button onClick={() => { this.removeGoal(goal.name) }}>X</button></p>
-                            )
-                        ) : (
+                                <div key={goal.name} className="entry cf">
+                                    <span className="button done" onClick={() => { this.addCount(goal.name) }}>✓</span>
+                                    <span className="name">{goal.name}</span>
+                                    <span className="points">{goal.points}</span>
+                                    <span className="count">{goal.count}</span>
+                                    <span className="button remove" onClick={() => { this.removeGoal(goal.name) }}>✗</span>
+                                </div>
+                            ))
+                        }
+                        </Reorder>
+                        : (
                             <div>Please enter a goal to get started.</div>
                         )}
                     </div>
                     <div id="rewards">
                         <h2>Rewards</h2>
+                        <div className="entry cf legend">
+                            <span className="name">Name</span>
+                            <span className="points">Points</span>
+                        </div>
                         {this.state.rewards.length > 0 ?
+                        <Reorder
+                            reorderId="rewards-reorder"
+                            className="reorder rewards"
+                            placeholderClassName="placeholder reward"
+                            onReorder={this.onReorder}
+                            mouseHoldTime={500}
+                            lock="horizontal"
+                        >
+                        {
                             this.state.rewards.map((reward) => (
-                                <p key={reward.name} className={this.state.points >= reward.points ? "good" : ""}>{reward.name}: {reward.points}</p>
-                            )
-                        ) : (
+                                <div key={reward.name} className={"cf entry " + (this.state.points >= reward.points ? "met" : "")}>
+                                    <span className="reward name">{reward.name}</span>
+                                    <span className="reward points">{reward.points}</span>
+                                    <span className="reward remove" onClick={() => { this.removeReward(reward.name) }}>✗</span>
+                                </div>
+                            ))
+                        }
+                        </Reorder>
+                        : (
                             <div>Please enter a reward.</div>
                         )}
                     </div>
@@ -82,6 +129,10 @@ class App extends React.Component {
 
     next() {
         this.reactSwipe.next();
+    }
+
+    help() {
+        console.log("helping...");
     }
 
     addGoalOrReward(e) {
@@ -138,6 +189,18 @@ class App extends React.Component {
         });
     }
 
+    removeReward(rewardName) {
+        this.setState((prevState) => {
+            return {
+                rewards: prevState.rewards.filter((reward) => (
+                    reward.name !== rewardName
+                ))
+            }
+        }, () => {
+            localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
+        });
+    }
+
     resetScore() {
         this.setState((prevState) => {
             return {
@@ -158,6 +221,22 @@ class App extends React.Component {
                 goals: [],
                 rewards: [],
                 points: 0
+            }
+        }, () => {
+            localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
+        });
+    }
+
+    onReorder(event, previousIndex, nextIndex, fromId, toId) {
+        this.setState(() => {
+            if (event.target.classList.contains("reward")) {
+                return {
+                    rewards: reorder(this.state.rewards, previousIndex, nextIndex)
+                }
+            } else {
+                return {
+                    goals: reorder(this.state.goals, previousIndex, nextIndex)
+                }
             }
         }, () => {
             localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
