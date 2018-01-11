@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactSwipe from 'react-swipe';
 import Reorder, { reorder } from 'react-reorder';
+import moment from 'moment';
+import Moment from 'react-moment';
 import './styles/styles.scss';
 
 class App extends React.Component {
@@ -9,15 +11,19 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
+        this.currentDate = moment().format("MM-DD-YYYY");
 
         if (localStorage.getItem("taskblaster-state") !== null) {
             this.state = JSON.parse(localStorage.getItem("taskblaster-state"));
         } else {
             this.state = {
+                date: this.currentDate
+            }
+            this.state[this.currentDate] = {
                 goals: [],
                 rewards: [],
                 points: 0
-            };
+            }
         }
 
         this.addGoalOrReward = this.addGoalOrReward.bind(this);
@@ -29,12 +35,58 @@ class App extends React.Component {
         this.next = this.next.bind(this);
         this.help = this.help.bind(this);
         this.onReorder = this.onReorder.bind(this);
+        this.previousDay = this.previousDay.bind(this);
+        this.nextDay = this.nextDay.bind(this);
+
+    }
+
+    previousDay() {
+        const date = moment(this.state.date, "MM-DD-YYYY").add(-1, 'days').format("MM-DD-YYYY");
+        if (this.state.hasOwnProperty(date)) {
+            this.setState((prevState) => {
+                return {
+                    date
+                }
+            }, () => {
+                localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
+            });
+        }
+    }
+
+    nextDay() {
+        if (moment(this.state.date, "MM-DD-YYYY").diff(moment(), "days") < 0) {
+            const oldDate = this.state.date;
+            const date = moment(this.state.date, "MM-DD-YYYY").add(1, 'days').format("MM-DD-YYYY");
+            this.setState((prevState) => {
+                if (this.state.hasOwnProperty(date)) {
+                    return {
+                        date
+                    }
+                } else {
+                    return {
+                        date,
+                        [date]: {
+                            goals: prevState[oldDate].goals,
+                            rewards: prevState[oldDate].rewards,
+                            points: 0
+                        }
+                    }
+                }
+            }, () => {
+                localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
+            });
+        }
     }
 
     render() {
         return (
             <div className="container">
-                <h1>Points: {this.state.points}</h1>
+                <div id="top-bar">
+                    <button onClick={this.previousDay}>PREV</button>
+                    {moment(this.state.date, "MM-DD-YYYY").format("dddd, MMMM Do, YYYY")}
+                    <button onClick={this.nextDay}>NEXT</button>
+                </div>
+                <h1>Points: {this.state[this.state.date].points}</h1>
                 <form onSubmit={this.addGoalOrReward}>
                     <input name="name" />
                     <input name="points" />
@@ -63,7 +115,7 @@ class App extends React.Component {
                             <span className="count">Count</span>
                             <span className="empty">&nbsp;</span>
                         </div>
-                        {this.state.goals.length > 0 ? 
+                        {this.state[this.state.date].goals.length > 0 ? 
                         <Reorder
                             reorderId="goals-reorder"
                             className="reorder goals"
@@ -72,7 +124,7 @@ class App extends React.Component {
                             lock="horizontal"
                         >
                         {
-                            this.state.goals.map((goal) => (
+                            this.state[this.state.date].goals.map((goal) => (
                                 <div key={goal.name} className="entry cf">
                                     <span className="button done" onClick={() => { this.addCount(goal.name) }}>✓</span>
                                     <span className="name">{goal.name}</span>
@@ -93,7 +145,7 @@ class App extends React.Component {
                             <span className="name">Name</span>
                             <span className="points">Points</span>
                         </div>
-                        {this.state.rewards.length > 0 ?
+                        {this.state[this.state.date].rewards.length > 0 ?
                         <Reorder
                             reorderId="rewards-reorder"
                             className="reorder rewards"
@@ -103,8 +155,8 @@ class App extends React.Component {
                             lock="horizontal"
                         >
                         {
-                            this.state.rewards.map((reward) => (
-                                <div key={reward.name} className={"cf entry " + (this.state.points >= reward.points ? "met" : "")}>
+                            this.state[this.state.date].rewards.map((reward) => (
+                                <div key={reward.name} className={"cf entry " + (this.state[this.state.date].points >= reward.points ? "met" : "")}>
                                     <span className="reward name">{reward.name}</span>
                                     <span className="reward points">{reward.points}</span>
                                     <span className="reward remove" onClick={() => { this.removeReward(reward.name) }}>✗</span>
@@ -146,11 +198,19 @@ class App extends React.Component {
             if (type == "goal") { 
                 GoalOrReward.count = 0;
                 return {
-                    goals: prevState.goals.concat(GoalOrReward)
+                    [this.state.date]: {
+                        goals: prevState[this.state.date].goals.concat(GoalOrReward),
+                        rewards: prevState[this.state.date].rewards,
+                        points: prevState[this.state.date].points
+                    }
                 }
             } else {
                 return {
-                    rewards: prevState.rewards.concat(GoalOrReward)
+                    [this.state.date]: {
+                        rewards: prevState[this.state.date].rewards.concat(GoalOrReward),
+                        goals: prevState[this.state.date].goals,
+                        points: prevState[this.state.date].points
+                    }
                 }
             }
         }, () => {
@@ -161,16 +221,19 @@ class App extends React.Component {
     }
 
     addCount(goalName) {
-        const thisGoalIndex = this.state.goals.findIndex((goal) => {
+        const thisGoalIndex = this.state[this.state.date].goals.findIndex((goal) => {
             return goal.name == goalName;
         });
         this.setState((prevState) => {
-            const goals = prevState.goals;
+            const goals = prevState[this.state.date].goals;
             goals[thisGoalIndex].count++;
-            const points = Number(prevState.points) + Number(goals[thisGoalIndex].points);
+            const points = Number(prevState[this.state.date].points) + Number(goals[thisGoalIndex].points);
             return {
-                goals,
-                points
+                [this.state.date]: {
+                    goals: goals,
+                    rewards: prevState[this.state.date].rewards,
+                    points: points
+                }
             }
         }, () => {
             localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
@@ -180,9 +243,13 @@ class App extends React.Component {
     removeGoal(goalName) {
         this.setState((prevState) => {
             return {
-                goals: prevState.goals.filter((goal) => (
-                    goal.name !== goalName
-                ))
+                [this.state.date]: {
+                    goals: prevState[this.state.date].goals.filter((goal) => (
+                        goal.name !== goalName
+                    )),
+                    rewards: prevState[this.state.date].rewards,
+                    points: prevState[this.state.date].points
+                }
             }
         }, () => {
             localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
@@ -192,9 +259,13 @@ class App extends React.Component {
     removeReward(rewardName) {
         this.setState((prevState) => {
             return {
-                rewards: prevState.rewards.filter((reward) => (
-                    reward.name !== rewardName
-                ))
+                [this.state.date]: {
+                    rewards: prevState[this.state.date].rewards.filter((reward) => (
+                        reward.name !== rewardName
+                    )),
+                    goals: prevState[this.state.date].goals,
+                    points: prevState[this.state.date].points
+                }
             }
         }, () => {
             localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
@@ -204,11 +275,14 @@ class App extends React.Component {
     resetScore() {
         this.setState((prevState) => {
             return {
-                goals: prevState.goals.map((goal) => {
-                    goal.count = 0;
-                    return goal;
-                }),
-                points: 0
+                [this.state.date]: {
+                    goals: prevState[this.state.date].goals.map((goal) => {
+                        goal.count = 0;
+                        return goal;
+                    }),
+                    rewards: prevState[this.state.date].rewards,
+                    points: 0
+                }
             }
         }, () => {
             localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
@@ -218,9 +292,11 @@ class App extends React.Component {
     clearEverything() {
         this.setState(() => {
             return {
-                goals: [],
-                rewards: [],
-                points: 0
+                [this.state.date]: {
+                    goals: [],
+                    rewards: [],
+                    points: 0
+                }
             }
         }, () => {
             localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
@@ -228,14 +304,22 @@ class App extends React.Component {
     }
 
     onReorder(event, previousIndex, nextIndex, fromId, toId) {
-        this.setState(() => {
+        this.setState((prevState) => {
             if (event.target.classList.contains("reward")) {
                 return {
-                    rewards: reorder(this.state.rewards, previousIndex, nextIndex)
+                    [this.state.date]: {
+                        rewards: reorder(this.state[this.state.date].rewards, previousIndex, nextIndex),
+                        goals: prevState[this.state.date].goals,
+                        points: prevState[this.state.date].points
+                    }
                 }
             } else {
                 return {
-                    goals: reorder(this.state.goals, previousIndex, nextIndex)
+                    [this.state.date]: {
+                        goals: reorder(this.state[this.state.date].goals, previousIndex, nextIndex),
+                        rewards: prevState[this.state.date].rewards,
+                        points: prevState[this.state.date].points
+                    }
                 }
             }
         }, () => {
