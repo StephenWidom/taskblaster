@@ -1,11 +1,19 @@
-@import '~pretty-checkbox/src/pretty-checkbox.scss';
+@import './base/fonts';
 @import './base/base';
+@import './base/settings';
 
 body {
-    max-width: 480px;
     margin: 0 auto;
+    color: $white;
+}
+
+#app {
+    width: 480px;
     border-left: 1px dotted #000;
     border-right: 1px dotted #000;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: $black;
 }
 
 .container {
@@ -14,51 +22,72 @@ body {
     min-height: 100vh;
 }
 
-.view-buttons button {
+#the-form {
+    display: block;
+    width: 100%;
+}
+
+.view-buttons button,
+#the-form input {
     display: block;
     float: left;
     width: 45%;
     border: 1px solid #555;
-    text-align: center;
     padding: 5px;
-    cursor: pointer;
-    transition: background 0.1s ease;
 }
 
-.view-buttons button:not(:last-child) {
+.view-buttons button {
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.1s ease;
+}
+
+.view-buttons button:not(:last-child),
+#the-form input:not(:last-child) {
     border-right: none;
 }
 
-#show-help {
+#show-help,
+#the-form input[type="submit"] {
     width: 10%;
 }
 
 button:active {
-    background: red;
+    background: $red;
+    color: $white;
 }
 
 .goals .entry,
 .legend {
     width: 100%;
     margin: 0;
+}
+
+.goals .entry,
+#rewards .entry:not(.legend) {
+    padding: 2px 0;
+    background: $midnight;
+}
+
+.entry:not(:last-child) {
     border-bottom: 1px dotted #ccc;
 }
 
 .legend {
     border-bottom: 1px dotted #000;
     text-transform: uppercase;
-    margin-bottom: 5px;
     font-size: 10pt;
 }
 
-.entry:not(.legend):nth-child(even) {
-    background: #dedede;
+.entry:not(.legend):nth-child(even),
+#rewards .entry:not(.legend):nth-child(even) {
+    background: $blacktwo;
 }
 
 .entry span,
 .entry .button,
 .legend span {
-    width: 15%;
+    width: 13.333%;
     float: left;
     display: block;
 }
@@ -70,12 +99,13 @@ button:active {
 
 .entry .name,
 .legend .name {
-    width: 50%;
+    width: 40%;
     text-align: left;
 }
 
 #rewards .name {
     width: 80%;
+    padding: 0 10px;
 }
 
 #rewards .points {
@@ -87,8 +117,19 @@ button:active {
     width: 10%;
 }
 
-.met {
-    color: green;
+#rewards .entry.met {
+    background: $green;
+    color: $white;
+}
+
+#rewards .entry.met:nth-child(even) {
+    background: $green;
+}
+
+.swipe {
+    border: 1px dotted $white;
+    border-top: none;
+    margin: 0 auto 5px;
 }
 
 .swipe>div {
@@ -121,14 +162,69 @@ button:active {
 }
 
 .reorder div.placeholder {
-    background: red !important;
+    background: $red !important;
+}
+
+h1 {
+    margin: 5px auto;
 }
 
 #top-bar {
-    background: #000;
-    color: #fff;
-    padding: 5px;
-    font-size: 9pt;
+    background: $red;
+    color: $white;
+    font-size: 10pt;
     width: 100%;
-    box-shadow: 0 -37px 0 37px #000;
+    font-family: "Montserrat", sans-serif;
+    box-shadow: 0 -37px 0 37px $red;
+    text-align: center;
+    position: relative;
+}
+
+#top-bar time {
+    padding: 5px;
+    display: inline-block;
+}
+
+#top-bar button {
+    float: left;
+    padding: 5px 15px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#top-bar button:first-child {
+    left: 0;
+}
+
+#top-bar button:last-child {
+    float: right;
+}
+
+.bottom-buttons button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    text-align: center;
+    width: 200px;
+    background: $white;
+    text-transform: uppercase;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: "Montserrat", sans-serif;
+}
+
+.bottom-buttons button:last-child {
+    background: $red;
+    color: $white;
+    text-shadow: 1px 1px $black;
+}
+
+h2 {
+    font-family: "Montserrat", sans-serif;
+    font-size: 26px;
+    color: $skyblue;
+    font-weight: 400;
+    text-shadow: 1px 1px $black, 2px 2px $blacktwo;
+    text-transform: uppercase;
+    padding: 3px;
 }
