@@ -53,6 +53,7 @@ body {
 #show-help,
 #the-form input[type="submit"] {
     width: 10%;
+    background: #eee;
 }
 
 button:active {
@@ -245,4 +246,11 @@ h2 {
     .legend {
         font-size: 7pt;
     }
+    .swipe > div {
+        font-size: 14pt;
+    }
+    h1 {
+        font-size: 28pt;
+    }
+    
 }
