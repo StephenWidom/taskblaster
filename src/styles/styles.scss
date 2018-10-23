@@ -34,12 +34,15 @@ body {
     width: 45%;
     border: 1px solid #555;
     padding: 5px;
+    -webkit-appearance: none;
+    border-radius: 0;
 }
 
 .view-buttons button {
     cursor: pointer;
     text-align: center;
     transition: all 0.1s ease;
+    background: #eee;
 }
 
 .view-buttons button:not(:last-child),
@@ -227,4 +230,19 @@ h2 {
     text-shadow: 1px 1px $black, 2px 2px $blacktwo;
     text-transform: uppercase;
     padding: 3px;
+}
+
+@media screen and (max-width: 480px) {
+    #app {
+        width: 100%;
+    }
+    .container {
+        max-width: 95%;
+    }
+    #top-bar {
+        font-size: 9pt;
+    }
+    .legend {
+        font-size: 7pt;
+    }
 }

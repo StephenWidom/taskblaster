@@ -360,17 +360,19 @@ class App extends React.Component {
     }
 
     clearDay() {
-        this.setState(() => {
-            return {
-                [this.state.date]: {
-                    goals: [],
-                    rewards: [],
-                    points: 0
+        if (confirm('Are you sure you want to remove all goals and rewards?')) {
+            this.setState(() => {
+                return {
+                    [this.state.date]: {
+                        goals: [],
+                        rewards: [],
+                        points: 0
+                    }
                 }
-            }
-        }, () => {
-            localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
-        });
+            }, () => {
+                localStorage.setItem("taskblaster-state", JSON.stringify(this.state));
+            });
+        }
     }
 
     onReorder(event, previousIndex, nextIndex, fromId, toId) {
